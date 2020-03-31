@@ -8,9 +8,11 @@ description: |-
 
 # Consul Enterprise Namespaces
 
-With [Consul Enterprise](https://www.hashicorp.com/consul.html) v1.7.0, data for different users or teams
-can be isolated from each other with the use of namespaces. Namespaces help reduce operational challenges 
-by removing restrictions around uniqueness of resource names across distinct teams, and enable operators 
+-> **Note**: This feature requires [Consul Enterprise](https://www.hashicorp.com/products/consul/) with the Governance and Policy module.
+
+With Consul Enterprise v1.7.0, data for different users or teams
+can be isolated from each other with the use of namespaces. Namespaces help reduce operational challenges
+by removing restrictions around uniqueness of resource names across distinct teams, and enable operators
 to provide self-service through delegation of administrative privileges.
 
 For more information on how to use namespaces with Consul Enterprise please review the following HashiCorp Learn Guides:

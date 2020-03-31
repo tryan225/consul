@@ -8,7 +8,9 @@ description: |-
 
 # Redundancy Zones
 
-[Consul Enterprise](https://www.hashicorp.com/consul.html) redundancy zones provide 
+-> **Note**: This feature is available in all versions of [Consul Enterprise](https://www.hashicorp.com/products/consul/).
+
+Consul Enterprise redundancy zones provide
 both scaling and resiliancy benefits by enabling the deployment of non-voting
 servers alongside voting servers on a per availability zone basis.  
 

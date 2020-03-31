@@ -8,8 +8,9 @@ description: |-
 
 # Automated Backups
 
+-> **Note**: This feature is available in all versions of [Consul Enterprise](https://www.hashicorp.com/products/consul/).
 
-[Consul Enterprise](https://www.hashicorp.com/consul.html) enables you to run
+Consul Enterprise enables you to run
 the snapshot agent within your environment as a service (Systemd as an example)
 or scheduled through other means. Once running, the snapshot agent service operates as a highly 
 available process that integrates with the snapshot API to automatically manage 

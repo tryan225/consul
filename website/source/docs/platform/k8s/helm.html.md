@@ -62,8 +62,8 @@ and consider if they're appropriate for your deployment.
 
         * <a name="v-global-gossipencryption-secretkey" href="#v-global-gossipencryption-secretkey">`secretKey`</a> (`string: ""`) - The key within the Kubernetes secret that holds the gossip encryption key.
 
-  * <a name="v-global-enableconsulnamespaces" href="#v-global-enableconsulnamespaces">`enableConsulNamespaces`</a> (`boolean: false`) - [Enterprise Only] `enableConsulNamespaces` indicates that you are running Consul Enterprise v1.7+ with a valid Consul Enterprise license and would like to make use of configuration beyond registering everything into the `default` Consul namespace. Requires consul-k8s v0.12+. Additional configuration options are found in the `consulNamespaces` section of both the catalog sync and connect injector.
-  
+  * <a name="v-global-enableconsulnamespaces" href="#v-global-enableconsulnamespaces">`enableConsulNamespaces`</a> (`boolean: false`) <span class="label-enterprise">Enterprise</span> - `enableConsulNamespaces` indicates that you are running Consul Enterprise v1.7+ with a valid Consul Enterprise license and would like to make use of configuration beyond registering everything into the `default` Consul namespace. Requires consul-k8s v0.12+. Additional configuration options are found in the `consulNamespaces` section of both the catalog sync and connect injector.
+
   * <a name="v-global-bootstrapacls" href="#v-global-bootstrapacls">`bootstrapACLs`</a> (`boolean: false`) - Automatically create and assign ACL tokens within the Consul cluster. This requires servers to be running inside Kubernetes. Additionally requires Consul >= 1.4 and consul-k8s >= 0.8.0.
 
   * <a name="v-global-tls" href="#v-global-tls">`tls`</a> - Enables TLS [encryption](https://learn.hashicorp.com/consul/security-networking/agent-encryption) across the cluster to verify authenticity of the Consul servers and clients. Requires Consul v1.4.1+ and consul-k8s v0.16.2+
@@ -114,7 +114,7 @@ and consider if they're appropriate for your deployment.
 
   * <a name="v-server-bootstrapexpect" href="#v-server-bootstrapexpect">`bootstrapExpect`</a> (`integer: 3`) - For new clusters, this is the number of servers to wait for before performing the initial leader election and bootstrap of the cluster. This must be less than or equal to `server.replicas`. This value is only used when bootstrapping new clusters, it has no effect during ongoing cluster maintenance.
 
-  * <a name="v-server-enterpriselicense" href="#v-server-enterpriselicense">`enterpriseLicense`</a> [Enterprise Only] - This value refers to a Kubernetes secret that you have created that contains your enterprise license. It is required if you are using an enterprise binary. Defining it here applies it to your cluster once a leader has been elected. If you are not using an enterprise image or if you plan to introduce the license key via another route, then set these fields to null.
+  * <a name="v-server-enterpriselicense" href="#v-server-enterpriselicense">`enterpriseLicense`</a> <span class="label-enterprise">Enterprise</span> - This value refers to a Kubernetes secret that you have created that contains your enterprise license. It is required if you are using an enterprise binary. Defining it here applies it to your cluster once a leader has been elected. If you are not using an enterprise image or if you plan to introduce the license key via another route, then set these fields to null.
 
       * <a name="v-global-enterpriselicense-secretname" href="#v-global-enterpriselicense-secretname">`secretName`</a> (`string: null`) - The name of the Kubernetes secret that holds the enterprise license. The secret must be in the same namespace that Consul is installed into.
 
@@ -327,7 +327,7 @@ and consider if they're appropriate for your deployment.
           type: RollingUpdate
         ```
 
-  * <a name="v-client-snapshotagent" href="#v-client-snapshotagent">`snapshotAgent`</a> [Enterprise Only] - Values for setting up and running [snapshot agents](https://www.consul.io/docs/commands/snapshot/agent.html) within the Consul clusters. They are required to be co-located with Consul clients, so will inherit the clients' nodeSelector, tolerations and affinity.
+  * <a name="v-client-snapshotagent" href="#v-client-snapshotagent">`snapshotAgent`</a> <span class="label-enterprise">Enterprise</span> - Values for setting up and running [snapshot agents](https://www.consul.io/docs/commands/snapshot/agent.html) within the Consul clusters. They are required to be co-located with Consul clients, so will inherit the clients' nodeSelector, tolerations and affinity.
 
       * <a name="v-client-snapshotagent-enabled" href="#v-client-snapshotagent-enabled">`enabled`</a> (`boolean: false`) - If true, the chart will install resources necessary to run the snapshot agent.
 
@@ -373,9 +373,9 @@ to run the sync program.
         For example, if `k8sAllowNamespaces` is `["*"]` and `k8sDenyNamespaces` is `["namespace1", "namespace2"]`, then all k8s namespaces besides `namespace1` and `namespace2` will be synced. 
 
   * <a name="v-synccatalog-k8ssourcenamespace" href="#v-synccatalog-k8ssourcenamespace">`k8sSourceNamespace`</a> (`string: ""`) - **[DEPRECATED] Use `k8sAllowNamespaces` and `k8sDenyNamespaces` instead.** `k8sSourceNamespace` is the Kubernetes namespace to watch for service changes and sync to Consul. If this is not set then it will default to all namespaces.
-  
-  * <a name="v-synccatalog-consulnamespaces" href="#v-synccatalog-consulnamespaces">`consulNamespaces`</a> -  [Enterprise Only] These settings manage the catalog sync's interaction with Consul namespaces (requires consul-ent v1.7+ and consul-k8s v0.12+). Also, `global.enableConsulNamespaces` must be true.
-  
+
+  * <a name="v-synccatalog-consulnamespaces" href="#v-synccatalog-consulnamespaces">`consulNamespaces`</a> <span class="label-enterprise">Enterprise</span> - These settings manage the catalog sync's interaction with Consul namespaces (requires consul-ent v1.7+ and consul-k8s v0.12+). Also, `global.enableConsulNamespaces` must be true.
+
       * <a name="v-synccatalog-consulnamespaces-consuldestinationnamespace" href="#v-synccatalog-consulnamespaces-consuldestinationnamespace">`consulDestinationNamespace`</a> (`string: "default"`) - Name of the Consul namespace to register all k8s services into. If the Consul namespace does not already exist, it will be created. This will be ignored if `mirroringK8S` is true.
       
       * <a name="v-synccatalog-consulnamespaces-mirroringk8s" href="#v-synccatalog-consulnamespaces-mirroringk8s">`mirroringK8S`</a> (`bool: false`) - causes k8s services to be registered into a Consul namespace of the same name as their k8s namespace, optionally prefixed if `mirroringK8SPrefix` is set below. If the Consul namespace does not already exist, it will be created. Turning this on overrides the `consulDestinationNamespace` setting. `addK8SNamespaceSuffix` may no longer be needed if enabling this option.
@@ -468,9 +468,9 @@ to run the sync program.
         For example, if `k8sAllowNamespaces` is `["*"]` and `k8sDenyNamespaces` is `["namespace1", "namespace2"]`, then all k8s namespaces besides `namespace1` and `namespace2` will be injected.
         
         Note: `namespaceSelector` takes precedence over this since it is applied first. `kube-system` and `kube-public` are never injected. Requires consul-k8s v0.12+.
-  
-  * <a name="v-connectinject-consulnamespaces" href="#v-connectinject-consulnamespaces">`consulNamespaces`</a> - [Enterprise Only] These settings manage the connect injector's interaction with Consul namespaces (requires consul-ent v1.7+ and consul-k8s v0.12+). Also, `global.enableConsulNamespaces` must be true.
-  
+
+  * <a name="v-connectinject-consulnamespaces" href="#v-connectinject-consulnamespaces">`consulNamespaces`</a> <span class="label-enterprise">Enterprise</span> - These settings manage the connect injector's interaction with Consul namespaces (requires consul-ent v1.7+ and consul-k8s v0.12+). Also, `global.enableConsulNamespaces` must be true.
+
       * <a name="v-connectinject-consulnamespaces-consuldestinationnamespace" href="#v-connectinject-consulnamespaces-consuldestinationnamespace">`consulDestinationNamespace`</a> (`string: "default"`) - Name of the Consul namespace to register all k8s services into. If the Consul namespace does not already exist, it will be created. This will be ignored if `mirroringK8S` is true.
       
       * <a name="v-connectinject-consulnamespaces-mirroringk8s" href="#v-connectinject-consulnamespaces-mirroringk8s">`mirroringK8S`</a> (`bool: false`) - causes k8s services to be registered into a Consul namespace of the same name as their k8s namespace, optionally prefixed if `mirroringK8SPrefix` is set below. If the Consul namespace does not already exist, it will be created. Turning this on overrides the `consulDestinationNamespace` setting.

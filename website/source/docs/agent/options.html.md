@@ -459,7 +459,7 @@ The options below are all specified on the command-line.
   as a permanent intent and does not attempt to join the cluster again when starting. This flag
   allows the previous state to be used to rejoin the cluster.
 
-* <a name="_segment"></a><a href="#_segment">`-segment`</a> - (Enterprise-only) This flag is used to set
+* <a name="_segment"></a><a href="#_segment">`-segment`</a> - <span class="label-enterprise">Enterprise</span> This flag is used to set
   the name of the network segment the agent belongs to. An agent can only join and communicate with other agents
   within its network segment. See the [Network Segments Guide](https://learn.hashicorp.com/consul/day-2-operations/network-segments) for more details.
   By default, this is an empty string, which is the default network segment.
@@ -482,7 +482,7 @@ The options below are all specified on the command-line.
 * <a name="_server_port"></a><a href="#_server_port">`-server-port`</a> - the server RPC port to listen on.
   This overrides the default server RPC port 8300. This is available in Consul 1.2.2 and later.
 
-* <a name="_non_voting_server"></a><a href="#_non_voting_server">`-non-voting-server`</a> - (Enterprise-only)
+* <a name="_non_voting_server"></a><a href="#_non_voting_server">`-non-voting-server`</a> - <span class="label-enterprise">Enterprise</span>
   This flag is used to make the server not participate in the Raft quorum, and have it only receive the data
   replication stream. This can be used to add read scalability to a cluster in cases where a high volume of
   reads to servers are needed.
@@ -676,10 +676,10 @@ Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
         token replication is enabled then it must have "write" permissions. This also enables
         Connect replication, for which the token will require both operator
         "write" and intention "read" permissions for replicating CA and Intention data.
-        
-        * <a name="acl_tokens_managed_service_provider"></a><a href="#acl_tokens_managed_service_provider">`managed_service_provider`</a> - 
-        **(Enterprise Only)** An array of ACL tokens used by Consul managed service providers for cluster operations.
-        
+
+        * <a name="acl_tokens_managed_service_provider"></a><a href="#acl_tokens_managed_service_provider">`managed_service_provider`</a> -
+        <span class="label-enterprise">Enterprise</span> An array of ACL tokens used by Consul managed service providers for cluster operations.
+
         ```javascript
           "managed_service_provider": [
                {
@@ -848,17 +848,17 @@ Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
       cluster. Only takes effect if all servers are running Raft protocol version 3 or higher. Must be a duration value
       such as `30s`. Defaults to `10s`.
 
-    * <a name="redundancy_zone_tag"></a><a href="#redundancy_zone_tag">`redundancy_zone_tag`</a> - (Enterprise-only)
+    * <a name="redundancy_zone_tag"></a><a href="#redundancy_zone_tag">`redundancy_zone_tag`</a> - <span class="label-enterprise">Enterprise</span>
       This controls the [`-node-meta`](#_node_meta) key to use when Autopilot is separating servers into zones for
       redundancy. Only one server in each zone can be a voting member at one time. If left blank (the default), this
       feature will be disabled.
 
-    * <a name="disable_upgrade_migration"></a><a href="#disable_upgrade_migration">`disable_upgrade_migration`</a> - (Enterprise-only)
+    * <a name="disable_upgrade_migration"></a><a href="#disable_upgrade_migration">`disable_upgrade_migration`</a> - <span class="label-enterprise">Enterprise</span>
       If set to `true`, this setting will disable Autopilot's upgrade migration strategy in Consul Enterprise of waiting
       until enough newer-versioned servers have been added to the cluster before promoting any of them to voters. Defaults
       to `false`.
 
-    * <a name="upgrade_version_tag"></a><a href="#upgrade_version_tag">`upgrade_version_tag`</a> - (Enterprise-only)
+    * <a name="upgrade_version_tag"></a><a href="#upgrade_version_tag">`upgrade_version_tag`</a> - <span class="label-enterprise">Enterprise</span>
       The node_meta tag to use for version info when performing upgrade migrations. If this is not set, the Consul
       version will be used.
 
@@ -1215,7 +1215,7 @@ Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
     * <a name="dns_cache_max_age"></a><a href="#dns_cache_max_age">`cache_max_age`</a> - When [use_cache](#dns_use_cache) is enabled, the agent
       will attempt to re-fetch the result from the servers if the cached value is older than this duration. See: [agent caching](/api/features/caching.html).
 
-    * <a name="dns_prefer_namespace"></a><a href="#dns_prefer_namespace">`prefer_namespace`</a> - **(Enterprise Only)** When
+    * <a name="dns_prefer_namespace"></a><a href="#dns_prefer_namespace">`prefer_namespace`</a> - <span class="label-enterprise">Enterprise</span> When
     set to true, in a DNS query for a service, the label between the domain and the `service` label will be treated as a
     namespace name instead of a datacenter. When set to false, the default, the behavior will be the same as non-Enterprise
     versions and will assume the label is the datacenter. See: [this section](/docs/agent/dns.html#namespaced-services-enterprise) for more details.
@@ -1708,10 +1708,10 @@ to the old fragment -->
 * <a name="retry_interval_wan"></a><a href="#retry_interval_wan">`retry_interval_wan`</a> Equivalent to the
   [`-retry-interval-wan` command-line flag](#_retry_interval_wan).
 
-* <a name="segment"></a><a href="#segment">`segment`</a> (Enterprise-only) Equivalent to the
+* <a name="segment"></a><a href="#segment">`segment`</a> <span class="label-enterprise">Enterprise</span> Equivalent to the
   [`-segment` command-line flag](#_segment).
 
-* <a name="segments"></a><a href="#segments">`segments`</a> (Enterprise-only) This is a list of nested objects that allows setting
+* <a name="segments"></a><a href="#segments">`segments`</a> <span class="label-enterprise">Enterprise</span> This is a list of nested objects that allows setting
   the bind/advertise information for network segments. This can only be set on servers. See the
   [Network Segments Guide](https://learn.hashicorp.com/consul/day-2-operations/network-segments) for more details.
     * <a name="segment_name"></a><a href="#segment_name">`name`</a> - The name of the segment. Must be a string between

@@ -38,7 +38,7 @@ Subcommands:
 For more information, examples, and usage about a subcommand, click on the name
 of the subcommand in the sidebar or one of the links below:
 
-- [agent](/docs/commands/snapshot/agent.html) (Consul Enterprise only)
+- [agent](/docs/commands/snapshot/agent.html) <span class="label-enterprise">Enterprise</span>
 - [inspect](/docs/commands/snapshot/inspect.html)
 - [restore](/docs/commands/snapshot/restore.html)
 - [save](/docs/commands/snapshot/save.html)
@@ -70,7 +70,7 @@ Term         2
 Version      1
 ```
 
-To run a daemon process that periodically saves snapshots (Consul Enterprise only):
+To run a daemon process that periodically saves snapshots <span class="label-enterprise">Enterprise</span>
 
 ```
 $ consul snapshot agent

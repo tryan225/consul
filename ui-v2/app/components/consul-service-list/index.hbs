@@ -3,7 +3,7 @@
 <ListCollection @cellHeight={{73}} @items={{items}} class="consul-service-list" as |item index|>
   <a href={{href-to routeName item.Name}}>
     <span class={{service/health-checks item}}></span>
-    <span>
+    <span data-test-service-name>
       {{item.Name}}
     </span>
     <span data-test-external-source="{{service/external-source item}}" class={{service/external-source item}}></span>

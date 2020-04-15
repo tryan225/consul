@@ -19,6 +19,6 @@
 }
 @media #{$--lt-horizontal-filters} {
   %filter-bar > *:first-child {
-    margin-bottom: 12px;
+    margin: 2px 0;
   }
 }

@@ -10,20 +10,12 @@
     </ol>
   </BlockSlot>
   <BlockSlot @name="header">
-    <h1>
-      {{item.Service.Service}}
-{{#let (service/external-source item.Service) as |externalSource| }}
-    {{#if externalSource }}
-        <span data-test-external-source={{externalSource}} style={{concat 'background-image: var(--' externalSource '-icon)'}} data-tooltip="Registered via {{externalSource}}">Registered via {{externalSource}}</span>
-    {{/if}}
-{{/let}}
-{{#if (eq item.Service.Kind 'connect-proxy')}}
-      <span class="kind-proxy">Proxy</span>
-{{else if (eq item.Service.Kind 'mesh-gateway')}}
-      <span class="kind-proxy">Mesh Gateway</span>
-{{/if}}
-    </h1>
-    <label for="toolbar-toggle"></label>
+    <div class="external-source">
+      <h1>
+        {{item.Service.Service}}
+      </h1>
+       <ConsulExternalSource @item={{item.Service}} />
+    </div>
         <TabNav @items={{
           compact
               (array

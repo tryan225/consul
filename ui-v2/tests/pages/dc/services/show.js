@@ -10,7 +10,9 @@ export default function(
 ) {
   return {
     visit: visitable('/:dc/services/:service'),
-    externalSource: attribute('data-test-external-source', 'h1 span'),
+    externalSource: attribute('data-test-external-source', '[data-test-external-source]', {
+      scope: '.external-source',
+    }),
     dashboardAnchor: {
       href: attribute('href', '[data-test-dashboard-anchor]'),
     },
@@ -18,8 +20,8 @@ export default function(
     filter: filter,
 
     // TODO: These need to somehow move to subpages
-    instances: collection('#instances [data-test-tabular-row]', {
-      address: text('[data-test-address]'),
+    instances: collection('.consul-service-instance-list > ul > li:not(:first-child)', {
+      address: text('a ul .address'),
     }),
     intentions: intentions(),
   };

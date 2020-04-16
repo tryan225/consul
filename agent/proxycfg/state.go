@@ -1048,7 +1048,6 @@ func (s *state) handleUpdateIngressGateway(u cache.UpdateEvent, snap *ConfigSnap
 			return fmt.Errorf("invalid type for response: %T", u.Result)
 		}
 
-		var upstreams structs.Upstreams
 		watchedSvcs := make(map[string]struct{})
 		for _, service := range services.Services {
 			u := makeUpstream(service, s.address)
@@ -1058,9 +1057,10 @@ func (s *state) handleUpdateIngressGateway(u cache.UpdateEvent, snap *ConfigSnap
 				return err
 			}
 			watchedSvcs[u.Identifier()] = struct{}{}
-			upstreams = append(upstreams, u)
+
+			id := IngressListenerKey{Protocol: service.Protocol, Port: service.Port}
+			snap.IngressGateway.Upstreams[id] = append(snap.IngressGateway.Upstreams[id], u)
 		}
-		snap.IngressGateway.Upstreams = upstreams
 
 		for id, cancelFn := range snap.IngressGateway.WatchedDiscoveryChains {
 			if _, ok := watchedSvcs[id]; !ok {

@@ -235,22 +235,49 @@ func (s *Server) listenersFromSnapshotIngressGateway(cfgSnap *proxycfg.ConfigSna
 	// TODO(ingress): We give each upstream a distinct listener at the moment,
 	// for http listeners we will need to multiplex upstreams on a single
 	// listener.
-	for _, u := range cfgSnap.IngressGateway.Upstreams {
-		id := u.Identifier()
+	for listenerKey, upstreams := range cfgSnap.IngressGateway.Upstreams {
+		if len(upstreams) == 1 {
+			u := upstreams[0]
+			id := u.Identifier()
 
-		chain := cfgSnap.IngressGateway.DiscoveryChain[id]
+			chain := cfgSnap.IngressGateway.DiscoveryChain[id]
 
-		var upstreamListener proto.Message
-		var err error
-		if chain == nil || chain.IsDefault() {
-			upstreamListener, err = s.makeUpstreamListenerIgnoreDiscoveryChain(&u, chain, cfgSnap)
-		} else {
-			upstreamListener, err = s.makeUpstreamListenerForDiscoveryChain(&u, chain, cfgSnap)
+			var upstreamListener proto.Message
+			var err error
+			if chain == nil || chain.IsDefault() {
+				upstreamListener, err = s.makeUpstreamListenerIgnoreDiscoveryChain(&u, chain, cfgSnap)
+			} else {
+				upstreamListener, err = s.makeUpstreamListenerForDiscoveryChain(&u, chain, cfgSnap)
+			}
+			if err != nil {
+				return nil, err
+			}
+			resources = append(resources, upstreamListener)
+
+			continue
 		}
+
+		// If multiple upstreams share this port, make a special listener for the protocol.
+		addr := cfgSnap.Address
+		if addr == "" {
+			addr = "0.0.0.0"
+		}
+
+		listener := makeListener(listenerKey.Protocol, addr, listenerKey.Port)
+		filter, err := makeListenerFilter(
+			true, listenerKey.Protocol, listenerKey.Protocol, "", "ingress_upstream_", "", false)
 		if err != nil {
 			return nil, err
 		}
-		resources = append(resources, upstreamListener)
+
+		listener.FilterChains = []envoylistener.FilterChain{
+			{
+				Filters: []envoylistener.Filter{
+					filter,
+				},
+			},
+		}
+		resources = append(resources, listener)
 	}
 
 	return resources, nil

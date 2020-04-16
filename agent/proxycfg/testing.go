@@ -1163,6 +1163,7 @@ func setupTestVariationConfigEntriesAndSnapshot(
 				},
 			},
 		)
+	case "http-multiple-services":
 	default:
 		t.Fatalf("unexpected variation: %q", variation)
 		return ConfigSnapshotUpstreams{}
@@ -1253,6 +1254,13 @@ func setupTestVariationConfigEntriesAndSnapshot(
 	case "chain-and-splitter":
 	case "grpc-router":
 	case "chain-and-router":
+	case "http-multiple-services":
+		snap.WatchedUpstreamEndpoints["foo"] = map[string]structs.CheckServiceNodes{
+			"v1.foo.default.dc1": TestUpstreamNodes(t),
+		}
+		snap.WatchedUpstreamEndpoints["bar"] = map[string]structs.CheckServiceNodes{
+			"v1.bar.default.dc1": TestUpstreamNodesAlternate(t),
+		}
 	default:
 		t.Fatalf("unexpected variation: %q", variation)
 		return ConfigSnapshotUpstreams{}
@@ -1342,6 +1350,10 @@ func TestConfigSnapshotIngress_SplitterWithResolverRedirectMultiDC(t testing.T) 
 	return testConfigSnapshotIngressGateway(t, true, "splitter-with-resolver-redirect-multidc")
 }
 
+func TestConfigSnapshotIngress_HTTPMultipleServices(t testing.T) *ConfigSnapshot {
+	return testConfigSnapshotIngressGateway(t, true, "http-multiple-services")
+}
+
 func TestConfigSnapshotIngressExternalSNI(t testing.T) *ConfigSnapshot {
 	return testConfigSnapshotIngressGateway(t, true, "external-sni")
 }
@@ -1424,12 +1436,14 @@ func testConfigSnapshotIngressGateway(
 			ConfigSnapshotUpstreams: setupTestVariationConfigEntriesAndSnapshot(
 				t, variation, leaf, additionalEntries...,
 			),
-			Upstreams: structs.Upstreams{
-				{
-					// We rely on this one having default type in a few tests...
-					DestinationName:  "db",
-					LocalBindPort:    9191,
-					LocalBindAddress: "2.3.4.5",
+			Upstreams: map[IngressListenerKey]structs.Upstreams{
+				IngressListenerKey{"tcp", 9191}: structs.Upstreams{
+					{
+						// We rely on this one having default type in a few tests...
+						DestinationName:  "db",
+						LocalBindPort:    9191,
+						LocalBindAddress: "2.3.4.5",
+					},
 				},
 			},
 		}

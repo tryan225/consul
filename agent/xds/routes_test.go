@@ -4,9 +4,13 @@ import (
 	"path"
 	"sort"
 	"testing"
+	"time"
 
 	envoy "github.com/envoyproxy/go-control-plane/envoy/api/v2"
+	"github.com/hashicorp/consul/agent/connect"
+	"github.com/hashicorp/consul/agent/consul/discoverychain"
 	"github.com/hashicorp/consul/agent/proxycfg"
+	"github.com/hashicorp/consul/agent/structs"
 	testinf "github.com/mitchellh/go-testing-interface"
 	"github.com/stretchr/testify/require"
 )
@@ -103,6 +107,50 @@ func TestRoutesFromSnapshot(t *testing.T) {
 			name:   "ingress-with-chain-and-router",
 			create: proxycfg.TestConfigSnapshotIngressWithRouter,
 			setup:  nil,
+		},
+		{
+			name:   "ingress-http-multiple-services",
+			create: proxycfg.TestConfigSnapshotIngress_HTTPMultipleServices,
+			setup: func(snap *proxycfg.ConfigSnapshot) {
+				snap.IngressGateway.Upstreams = map[proxycfg.IngressListenerKey]structs.Upstreams{
+					proxycfg.IngressListenerKey{Protocol: "http", Port: 8080}: structs.Upstreams{
+						{
+							DestinationName: "foo",
+							LocalBindPort:   8080,
+						},
+						{
+							DestinationName: "bar",
+							LocalBindPort:   8080,
+						},
+					},
+				}
+				entries := []structs.ConfigEntry{
+					&structs.ProxyConfigEntry{
+						Kind: structs.ProxyDefaults,
+						Name: structs.ProxyConfigGlobal,
+						Config: map[string]interface{}{
+							"protocol": "http",
+						},
+					},
+					&structs.ServiceResolverConfigEntry{
+						Kind:           structs.ServiceResolver,
+						Name:           "foo",
+						ConnectTimeout: 22 * time.Second,
+					},
+					&structs.ServiceResolverConfigEntry{
+						Kind:           structs.ServiceResolver,
+						Name:           "bar",
+						ConnectTimeout: 22 * time.Second,
+					},
+				}
+				fooChain := discoverychain.TestCompileConfigEntries(t, "foo", "default", "dc1", connect.TestClusterID+".consul", "dc1", nil, entries...)
+				barChain := discoverychain.TestCompileConfigEntries(t, "bar", "default", "dc1", connect.TestClusterID+".consul", "dc1", nil, entries...)
+
+				snap.IngressGateway.DiscoveryChain = map[string]*structs.CompiledDiscoveryChain{
+					"foo": fooChain,
+					"bar": barChain,
+				}
+			},
 		},
 	}
 

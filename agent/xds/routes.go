@@ -37,7 +37,7 @@ func routesFromSnapshotConnectProxy(cfgSnap *proxycfg.ConfigSnapshot) ([]proto.M
 		return nil, errors.New("nil config given")
 	}
 
-	return routesFromUpstreams(cfgSnap.ConnectProxy.ConfigSnapshotUpstreams, cfgSnap.Proxy.Upstreams)
+	return routesFromUpstreams(cfgSnap.ConnectProxy.ConfigSnapshotUpstreams, cfgSnap.Proxy.Upstreams, "")
 }
 
 // routesFromSnapshotIngressGateway returns the xDS API representation of the
@@ -47,12 +47,33 @@ func routesFromSnapshotIngressGateway(cfgSnap *proxycfg.ConfigSnapshot) ([]proto
 		return nil, errors.New("nil config given")
 	}
 
-	return routesFromUpstreams(cfgSnap.IngressGateway.ConfigSnapshotUpstreams, cfgSnap.IngressGateway.Upstreams)
+	var result []proto.Message
+	for listenerKey, upstreams := range cfgSnap.IngressGateway.Upstreams {
+		routeName := ""
+		if len(upstreams) > 1 {
+			routeName = listenerKey.Protocol
+		}
+
+		routes, err := routesFromUpstreams(cfgSnap.IngressGateway.ConfigSnapshotUpstreams, upstreams, routeName)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, routes...)
+	}
+
+	return result, nil
 }
 
-func routesFromUpstreams(snap proxycfg.ConfigSnapshotUpstreams, upstreams structs.Upstreams) ([]proto.Message, error) {
+func routesFromUpstreams(snap proxycfg.ConfigSnapshotUpstreams, upstreams structs.Upstreams, routeName string) ([]proto.Message, error) {
 	var resources []proto.Message
 
+	upstreamRoute := &envoy.RouteConfiguration{
+		Name: routeName,
+		// ValidateClusters defaults to true when defined statically and false
+		// when done via RDS. Re-set the sane value of true to prevent
+		// null-routing traffic.
+		ValidateClusters: makeBoolValue(true),
+	}
 	for _, u := range upstreams {
 		upstreamID := u.Identifier()
 
@@ -64,14 +85,28 @@ func routesFromUpstreams(snap proxycfg.ConfigSnapshotUpstreams, upstreams struct
 		if chain == nil || chain.IsDefault() {
 			// TODO(rb): make this do the old school stuff too
 		} else {
-			upstreamRoute, err := makeUpstreamRouteForDiscoveryChain(&u, chain)
+			useServiceDomain := routeName != ""
+			virtualHost, err := makeUpstreamRouteForDiscoveryChain(upstreamID, chain, useServiceDomain)
 			if err != nil {
 				return nil, err
 			}
-			if upstreamRoute != nil {
-				resources = append(resources, upstreamRoute)
+
+			if routeName == "" {
+				route := &envoy.RouteConfiguration{
+					Name:             upstreamID,
+					VirtualHosts:     []envoyroute.VirtualHost{*virtualHost},
+					ValidateClusters: makeBoolValue(true),
+				}
+
+				resources = append(resources, route)
+			} else {
+				upstreamRoute.VirtualHosts = append(upstreamRoute.VirtualHosts, *virtualHost)
 			}
 		}
+	}
+
+	if routeName != "" {
+		resources = []proto.Message{upstreamRoute}
 	}
 
 	// TODO(rb): make sure we don't generate an empty result
@@ -80,12 +115,10 @@ func routesFromUpstreams(snap proxycfg.ConfigSnapshotUpstreams, upstreams struct
 }
 
 func makeUpstreamRouteForDiscoveryChain(
-	u *structs.Upstream,
+	routeName string,
 	chain *structs.CompiledDiscoveryChain,
-) (*envoy.RouteConfiguration, error) {
-	upstreamID := u.Identifier()
-	routeName := upstreamID
-
+	useServiceDomain bool,
+) (*envoyroute.VirtualHost, error) {
 	var routes []envoyroute.Route
 
 	startNode := chain.Nodes[chain.StartNode]
@@ -188,20 +221,17 @@ func makeUpstreamRouteForDiscoveryChain(
 		panic("unknown first node in discovery chain of type: " + startNode.Type)
 	}
 
-	return &envoy.RouteConfiguration{
-		Name: routeName,
-		VirtualHosts: []envoyroute.VirtualHost{
-			envoyroute.VirtualHost{
-				Name:    routeName,
-				Domains: []string{"*"},
-				Routes:  routes,
-			},
-		},
-		// ValidateClusters defaults to true when defined statically and false
-		// when done via RDS. Re-set the sane value of true to prevent
-		// null-routing traffic.
-		ValidateClusters: makeBoolValue(true),
-	}, nil
+	host := &envoyroute.VirtualHost{
+		Name:    routeName,
+		Domains: []string{"*"},
+		Routes:  routes,
+	}
+	// If useServiceDomain was set, restrict the domain for the route to the service prefix, e.g. "foo.*"
+	if useServiceDomain {
+		host.Domains = []string{fmt.Sprintf("%s.*", chain.ServiceName)}
+	}
+
+	return host, nil
 }
 
 func makeRouteMatchForDiscoveryRoute(discoveryRoute *structs.DiscoveryRoute, protocol string) envoyroute.RouteMatch {

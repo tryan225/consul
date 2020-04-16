@@ -39,6 +39,9 @@ defaults for all the instances of a given service
 * [`proxy-defaults`](/docs/agent/config-entries/proxy-defaults.html) - controls
 proxy configuration
 
+* [`ingress-gateway`](/docs/agent/config-entries/ingress-gateway.html) -
+  controls the configuration of Ingress gateways
+
 ## Managing Configuration Entries
 
 Configuration entries should be managed with the Consul

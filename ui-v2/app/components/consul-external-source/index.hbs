@@ -7,9 +7,9 @@
     {{else}}
       <span data-test-external-source={{externalSource}} class="consul-external-source source-{{externalSource}}">
         {{#if (eq externalSource 'aws')}}
-          <span>Synced from {{uppercase externalSource}}</span>
+          <span>Registered via {{uppercase externalSource}}</span>
         {{else}}
-          <span>Synced from {{capitalize externalSource}}</span>
+          <span>Registered via {{capitalize externalSource}}</span>
         {{/if}}
       </span>
     {{/if}}

@@ -19,3 +19,6 @@
 %composite-row-detail > li:not(:first-child) {
   margin-left: 12px;
 }
+%composite-row-detail .node::before {
+  margin-top: 2px;
+}

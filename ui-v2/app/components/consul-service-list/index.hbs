@@ -6,9 +6,28 @@
     <span>
       {{item.Name}}
     </span>
-    <YieldSlot @name="metadata" @params={{block-params item}}>
-      {{yield}}
-    </YieldSlot>
+    <ul>
+      <ConsulExternalSource @item={{item}} as |ExternalSource|>
+        <li>
+          <ExternalSource />
+        </li>
+      </ConsulExternalSource>
+    {{#if (not-eq item.InstanceCount '')}}
+      <li>
+        {{format-number item.InstanceCount}} {{pluralize item.InstanceCount 'Instance' without-count=true}}
+      </li>
+    {{/if}}
+    {{#if (get proxies item.Name)}}
+      <li class="proxy">
+        connected with proxy
+      </li>
+    {{/if}}
+    {{#if (gt items.Tags.length 0)}}
+      <li>
+        <TagList @items={{item.Tags}}/>
+      </li>
+    {{/if}}
+    </ul>
   </a>
 </ListCollection>
 {{/if}}
